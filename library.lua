@@ -279,7 +279,7 @@ function lib.API.EnableArray(tog)
 end
 
 if inputService.TouchEnabled then
-	lplr:Kick('Not mobile supported for the time being :)')
+	--lplr:Kick('Not mobile supported for the time being :)')
 end
 
 configSys:Load()
