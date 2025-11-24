@@ -401,7 +401,7 @@ task.defer(function()
 												weapon_name = Sword.Name,
 												extra = {
 													rizz = "Bro.",
-													sigmas = "The...",
+													sigma = "The...",
 													those = workspace.Name == "Ok"
 												}
 											})
