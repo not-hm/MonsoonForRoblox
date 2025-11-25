@@ -440,7 +440,7 @@ lib.API.CreateWindow = function(txt)
 			end
 
 			local ModuleButton = Instance.new('Frame')
-			ModuleButton.Size = UDim2.new(1, 0, 0, 32)
+			ModuleButton.Size = UDim2.new(1, 0, 0, 34)
 			ModuleButton.BorderSizePixel = 0
 			ModuleButton.BackgroundColor3 = cfg[Table.Name].Enabled and lib.API.themes.Secondary[lib.API.themes.theme] or lib.API.themes.Main[lib.API.themes.theme]
 			ModuleButton.Parent = ModuleFrame
@@ -497,7 +497,7 @@ lib.API.CreateWindow = function(txt)
 				end
 
 				local ModuleFrame = Instance.new('Frame')
-				ModuleFrame.Size = UDim2.new(1, 0, 0, 32)
+				ModuleFrame.Size = UDim2.new(1, 0, 0, 34)
 				ModuleFrame.BackgroundColor3 = cfg[Table.Name].Toggles[tab.Name].Enabled and lib.API.themes.MiniToggle[lib.API.themes.theme] or lib.API.themes.Third[lib.API.themes.theme]
 				ModuleFrame.BorderSizePixel = 0
 				ModuleFrame.Parent = DropdownFrame
@@ -549,7 +549,7 @@ lib.API.CreateWindow = function(txt)
 				end
 
 				local PickerFrame = Instance.new('Frame')
-				PickerFrame.Size = UDim2.new(1, 0, 0, 32)
+				PickerFrame.Size = UDim2.new(1, 0, 0, 34)
 				PickerFrame.BackgroundColor3 = lib.API.themes.Third[lib.API.themes.theme]
 				PickerFrame.BorderSizePixel = 0
 				PickerFrame.Parent = DropdownFrame
@@ -561,6 +561,7 @@ lib.API.CreateWindow = function(txt)
 				PickerText.Size = UDim2.fromScale(1, 1)
 				PickerText.BackgroundTransparency = 1
 				PickerText.TextXAlignment = Enum.TextXAlignment.Left
+				PickerText.TextYAlignment = Enum.TextYAlignment.Center
 				PickerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				PickerText.TextSize = 10
 				PickerText.Text = tab.Name
@@ -571,6 +572,7 @@ lib.API.CreateWindow = function(txt)
 				OptionText.Size = UDim2.fromScale(0.9, 1)
 				OptionText.BackgroundTransparency = 1
 				OptionText.TextXAlignment = Enum.TextXAlignment.Right
+				OptionText.TextYAlignment = Enum.TextYAlignment.Center
 				OptionText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				OptionText.TextSize = 10
 				OptionText.Text = cfg[Table.Name].Dropdowns[tab.Name].Value
@@ -626,7 +628,7 @@ lib.API.CreateWindow = function(txt)
 				end
 
 				local SliderFrame = Instance.new('Frame')
-				SliderFrame.Size = UDim2.new(1, 0, 0, 32)
+				SliderFrame.Size = UDim2.new(1, 0, 0, 34)
 				SliderFrame.BackgroundColor3 = lib.API.themes.Third[lib.API.themes.theme]
 				SliderFrame.BorderSizePixel = 0
 				SliderFrame.Parent = DropdownFrame
@@ -635,8 +637,8 @@ lib.API.CreateWindow = function(txt)
 				cfg[Table.Name].Sliders[tab.Name].Inst = SliderFrame
 
 				local SliderText = Instance.new('TextLabel')
-				SliderText.AnchorPoint = Vector2.new(0.05, 0.01)
-				SliderText.Position = UDim2.fromScale(0.05, 0.01)
+				SliderText.AnchorPoint = Vector2.new(0.05, 0.06)
+				SliderText.Position = UDim2.fromScale(0.05, 0.06)
 				SliderText.Size = UDim2.new(0, 0, 0, 15)
 				SliderText.BackgroundTransparency = 1
 				SliderText.TextXAlignment = Enum.TextXAlignment.Left
@@ -646,8 +648,8 @@ lib.API.CreateWindow = function(txt)
 				SliderText.Parent = SliderFrame
 
 				local ValueText = Instance.new('TextBox')
-				ValueText.AnchorPoint = Vector2.new(0.95, 0.01)
-				ValueText.Position = UDim2.fromScale(0.95, 0.01)
+				ValueText.AnchorPoint = Vector2.new(0.95, 0.06)
+				ValueText.Position = UDim2.fromScale(0.95, 0.06)
 				ValueText.BackgroundTransparency = 1
 				ValueText.TextXAlignment = Enum.TextXAlignment.Right
 				ValueText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -773,7 +775,7 @@ lib.API.CreateWindow = function(txt)
 			end))
 
 			local KeybindButton = Instance.new('Frame')
-			KeybindButton.Size = UDim2.new(1, 0, 0, 32)
+			KeybindButton.Size = UDim2.new(1, 0, 0, 34)
 			KeybindButton.BorderSizePixel = 0
 			KeybindButton.BackgroundColor3 = lib.API.themes.Third[lib.API.themes.theme]
 			KeybindButton.Parent = DropdownFrame
