@@ -176,7 +176,9 @@ local bd = {
 	},
 }
 
+bd.Entity.LocalEntity = bd.Entity.FindByPlayer(lplr)
 function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
+	local tool = blockType == 'Clay' and 'Blocks' or ("%*Block"):format(blockType)
 	if lplr.Character and (lplr.Character.PrimaryPart and (lplr.Character:FindFirstChild('Humanoid') and lplr.Character.Humanoid.Health > 0)) then
 		bd.ViewmodelController:PlayAnimation('Blocks')
 
@@ -188,8 +190,12 @@ function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
 		block.Parent = workspace.Map
 		bd.EffectsController:PlaySound(block.Position)
 
+		pcall(function()
+			bd.Entity.LocalEntity:RemoveTool(tool, 1)
+		end)
+
 		task.spawn(function()
-			bd.Blink.item_action.place_block.invoke({
+			local suc, ret = bd.Blink.item_action.place_block.invoke({
 				position = blockPos,
 				block_type = blockType,
 				extra = {
@@ -200,9 +206,13 @@ function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
 			})
 
 			block:Destroy()
+			if not (suc or ret) then
+				pcall(function()
+					bd.Entity.LocalEntity:AddTool(tool, 1)
+				end)
+			end
 		end)
 	end
 end
 
-bd.Entity.LocalEntity = bd.Entity.FindByPlayer(lplr)
 return bd
