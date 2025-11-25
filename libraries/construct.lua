@@ -32,7 +32,7 @@ local DAMAGE = {
 }
 
 local bd = {
-	Blink = loadstring(game:HttpGet('https://raw.githubusercontent.com/not-hm/MonsoonForRoblox/refs/heads/main/blink.lua'))(),
+	Blink = loadstring(game:HttpGet('https://raw.githubusercontent.com/not-hm/MonsoonForRoblox//main/blink.lua'))(),
 	BreakTimes = {
 		Bed = 0.3,
 		Clay = 1.8,
