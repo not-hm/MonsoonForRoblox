@@ -189,10 +189,7 @@ function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
 		block:AddTag('Block')
 		block.Parent = workspace.Map
 		bd.EffectsController:PlaySound(block.Position)
-
-		pcall(function()
-			bd.Entity.LocalEntity:RemoveTool(tool, 1)
-		end)
+		replicatedStorage.Modules.Knit.Services.EntityService.RE.EntityToolRemoved:FireServer(tool, 1)
 
 		task.spawn(function()
 			local suc, ret = bd.Blink.item_action.place_block.invoke({
@@ -207,9 +204,7 @@ function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
 
 			block:Destroy()
 			if not (suc or ret) then
-				pcall(function()
-					bd.Entity.LocalEntity:AddTool(tool, 1)
-				end)
+				replicatedStorage.Modules.Knit.Services.EntityService.RE.EntityToolAdded:FireServer(tool, 1)
 			end
 		end)
 	end
