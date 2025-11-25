@@ -14,7 +14,7 @@ local tweenService = cloneref(game:GetService('TweenService'))
 local playersService = cloneref(game:GetService('Players'))
 local lplr = playersService.LocalPlayer
 
-local sounds = {'rbxassetid://111007032707310', 'rbxassetid://81851569676153', 'rbxassetid://108304966836429'}
+local sounds = { 'rbxassetid://111007032707310', 'rbxassetid://81851569676153', 'rbxassetid://108304966836429' }
 local animations = {
 	Sword = 'rbxassetid://81023102192808',
 	Hammer = 'rbxassetid://113992130601874',
@@ -32,7 +32,7 @@ local DAMAGE = {
 }
 
 local bd = {
-	Blink = loadstring(game:HttpGet('https://raw.githubusercontent.com/not-hm/MonsoonForRoblox//main/blink.lua'))(),
+	Blink = loadstring(game:HttpGet('https://raw.githubusercontent.com/not-hm/MonsoonForRoblox/main/blink.lua'))(),
 	BreakTimes = {
 		Bed = 0.3,
 		Clay = 1.8,
@@ -43,10 +43,7 @@ local bd = {
 		Diamond = 25,
 		TNT = 999,
 	},
-	BlockPlacementController = {
-		PlaceBlock = function(self, blockPos, blockType)
-		end
-	},
+	BlockPlacementController = {},
 	CombatService = {
 		KnockBackApplied = replicatedStorage.Modules.Knit.Services.CombatService.RE:FindFirstChild('KnockBackApplied'),
 	},
@@ -101,27 +98,22 @@ local bd = {
 	},
 	NotificationController = {
 		SendNotification = function(self, text, duration)
-			local notif = lplr.PlayerGui:WaitForChild("Notifications"):WaitForChild("Notifications").Template:Clone()
+			local notif = lplr.PlayerGui:WaitForChild('Notifications'):WaitForChild('Notifications').Template:Clone()
 			notif.Text = text
 			notif.Name = 'TextLabel'
 			notif.Visible = true
-			notif.Parent = lplr.PlayerGui:WaitForChild("Notifications"):WaitForChild("Notifications")
+			notif.Parent = lplr.PlayerGui:WaitForChild('Notifications'):WaitForChild('Notifications')
 
 			task.wait(duration or 3)
-			local res = tweenService:Create(notif, TweenInfo.new(1), {
-				BackgroundTransparency = 1,
-				TextTransparency = 1
-			})
-			tweenService:Create(notif.UIStroke, TweenInfo.new(1), {
-				Transparency = 1
-			}):Play()
+			local res = tweenService:Create(notif, TweenInfo.new(1), {BackgroundTransparency = 1, TextTransparency = 1})
+			tweenService:Create(notif.UIStroke, TweenInfo.new(1), {Transparency = 1}):Play()
 
 			res:Play()
 			res.Completed:Wait()
 			res:Destroy()
 
 			notif:Destroy()
-		end
+		end,
 	},
 	ServerData = {
 		Submode = httpService:JSONDecode(replicatedStorage.Modules.ServerData.Cache.Value),
@@ -163,6 +155,7 @@ local bd = {
 			else
 				toolnme = tool
 			end
+
 			anim.AnimationId = animations[toolnme]
 
 			local track = animObj.AnimationController.Animator:LoadAnimation(anim)
@@ -179,40 +172,37 @@ local bd = {
 			track:Play()
 
 			return track
-		end,
-		ToggleLoopedAnimation = function(self, tool, tog)
-			if self:GetContainer():FindFirstChild('Viewmodel') then
-				if self:GetContainer().Viewmodel:FindFirstChild(tool) then
-					local mainpart = self:GetContainer().Viewmodel[tool].Handle.MainPart
-					local motor6D = self:GetContainer().Viewmodel[tool].Handle.Motor6D
-
-					if DAMAGE[tool] then
-						self.SwordBlocked = tog
-						if tog then
-							mainpart.C1 = CFrame.new(-1.2, -0.5, 0) * CFrame.fromOrientation(-0.7853981633974483, 2.2689280275926285, -1.0471975511965976)
-							if tool ~= 'Hammer' then
-								self:GetContainer().Viewmodel[tool].MainPart.Mesh.Scale = Vector3.new(2.8, 5, 0.3)
-							end
-						else
-							mainpart.C1 = CFrame.new(0, 0.5, 0) * CFrame.fromOrientation(0, -3.141592653589793, 0)
-							if tool ~= 'Hammer' then
-								self:GetContainer().Viewmodel[tool].MainPart.Mesh.Scale = Vector3.new(2, 5, 0.3)
-							end
-						end
-					elseif tool == 'DefaultBow' then
-						if tog then
-							motor6D.C0 = CFrame.new(2.7, -1.6, -4) * CFrame.fromOrientation(0.20943951023931956, -0.08726646259971647,-0.03490658503988659)
-						else
-							motor6D.C0 = CFrame.new(3.5, -2.9, -3.8) * CFrame.fromOrientation(0.29670597283903605, 0, 0)
-						end
-					end
-				end
-			else
-				return
-			end
-		end,
+		end
 	},
 }
+
+function bd.BlockPlacementController.PlaceBlock(self, blockPos, blockType)
+	if lplr.Character and (lplr.Character.PrimaryPart and (lplr.Character:FindFirstChild('Humanoid') and lplr.Character.Humanoid.Health > 0)) then
+		bd.ViewmodelController:PlayAnimation('Blocks')
+
+		local block = replicatedStorage.Assets.Blocks[blockType]:Clone()
+		block.Name = 'TempBlock'
+		block.Position = blockPos
+		block:AddTag('TempBlock')
+		block:AddTag('Block')
+		block.Parent = workspace.Map
+		bd.EffectsController:PlaySound(block.Position)
+
+		task.spawn(function()
+			bd.Blink.item_action.place_block.invoke({
+				position = blockPos,
+				block_type = blockType,
+				extra = {
+					rizz = 'Bro.',
+					sigma = 'The...',
+					those = workspace.Name == 'Ok',
+				},
+			})
+
+			block:Destroy()
+		end)
+	end
+end
 
 bd.Entity.LocalEntity = bd.Entity.FindByPlayer(lplr)
 return bd
