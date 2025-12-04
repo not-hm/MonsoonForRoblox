@@ -1,3 +1,4 @@
+local Lighting = game:GetService("Lighting")
 --[[
 	
 	- [ stav.lua ] -
@@ -32,6 +33,7 @@ end
 local ScreenGUI = Instance.new('ScreenGui')
 ScreenGUI.Name = '\0'
 ScreenGUI.ResetOnSpawn = false
+ScreenGUI.DisplayOrder = 1/0
 ScreenGUI.Parent = gethui()
 
 local Scale = Instance.new('UIScale')
@@ -41,6 +43,11 @@ Scale.Scale = math.min(gameCamera.ViewportSize.X / 1920, gameCamera.ViewportSize
 table.insert(lib.connections, gameCamera:GetPropertyChangedSignal('ViewportSize'):Connect(function()
 	Scale.Scale = math.min(gameCamera.ViewportSize.X / 1920, gameCamera.ViewportSize.Y / 1080)
 end))
+
+local Blur = Instance.new('BlurEffect')
+Blur.Size = 24
+Blur.Enabled = true
+Blur.Parent = Lighting
 
 local ArrayGUI = Instance.new('ScreenGui')
 ArrayGUI.Name = '\0'
@@ -83,7 +90,7 @@ lib.API.themes = {
 local cfg = {}
 local configSys = {
 	canSave = true,
-	file = 'Astolfo/configs/'..game.PlaceId..'.json',
+	file = 'Monsoon/configs/'..game.PlaceId..'.json',
 	Save = function(self)
 		if runService:IsStudio() then return end
 		if not self.canSave then return end
@@ -100,7 +107,7 @@ local configSys = {
 }
 
 if not runService:IsStudio() then
-	for _, v in {'Astolfo', 'Astolfo/configs'} do
+	for _, v in {'Monsoon', 'Monsoon/configs'} do
 		if not isfolder(v) then
 			makefolder(v)
 		end
@@ -418,6 +425,7 @@ lib.API.CreateWindow = function(txt)
 		if gpe then return end
 
 		if key.KeyCode == Enum.KeyCode.RightShift then
+            Blur.Enabled = not WindowFrame.Visible
 			WindowFrame.Visible = not WindowFrame.Visible
 		end
 	end))
@@ -844,6 +852,7 @@ lib.API.Uninject = function()
 
 	ScreenGUI:Destroy()
 	ArrayGUI:Destroy()
+    Blur:Destroy()
 	lib = nil
 end
 
