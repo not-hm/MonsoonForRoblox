@@ -32,6 +32,7 @@ end
 local ScreenGUI = Instance.new('ScreenGui')
 ScreenGUI.Name = '\0'
 ScreenGUI.ResetOnSpawn = false
+ScreenGUI.DisplayOrder = 1/0
 ScreenGUI.Parent = gethui()
 
 local Scale = Instance.new('UIScale')
@@ -41,6 +42,11 @@ Scale.Scale = math.min(gameCamera.ViewportSize.X / 1920, gameCamera.ViewportSize
 table.insert(lib.connections, gameCamera:GetPropertyChangedSignal('ViewportSize'):Connect(function()
 	Scale.Scale = math.min(gameCamera.ViewportSize.X / 1920, gameCamera.ViewportSize.Y / 1080)
 end))
+
+local Blur = Instance.new('BlurEffect')
+Blur.Size = 24
+Blur.Enabled = true
+Blur.Parent = gameCamera
 
 local ArrayGUI = Instance.new('ScreenGui')
 ArrayGUI.Name = '\0'
@@ -83,7 +89,7 @@ lib.API.themes = {
 local cfg = {}
 local configSys = {
 	canSave = true,
-	file = 'Astolfo/configs/'..game.PlaceId..'.json',
+	file = 'Monsoon/configs/'..game.PlaceId..'.json',
 	Save = function(self)
 		if runService:IsStudio() then return end
 		if not self.canSave then return end
@@ -100,16 +106,21 @@ local configSys = {
 }
 
 if not runService:IsStudio() then
-	for _, v in {'Astolfo', 'Astolfo/configs'} do
+	for _, v in {'Monsoon', 'Monsoon/configs'} do
 		if not isfolder(v) then
 			makefolder(v)
 		end
 	end
 end
 
+local SuffixVal = {Enabled = true}
+
 local index = 0
 local Windows = {}
-local Array = {}
+local Array = {
+    Suffix = {},
+    Arrays = {}
+}
 
 local ArrayFrame = Instance.new('Frame')
 ArrayFrame.AnchorPoint = Vector2.new(0.995, 0.05)
@@ -132,11 +143,12 @@ local function AddArray(name)
 	Text.BorderSizePixel = 0
 	Text.Text = name
 	Text.TextColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
-	Text.TextSize = 12
+	Text.TextSize = 20
 	Text.ZIndex = -1
 	Text.Name = name
 	Text.TextYAlignment = Enum.TextYAlignment.Center
 	Text.TextXAlignment = Enum.TextXAlignment.Center
+    Text.Font = Enum.Font.BuilderSansMedium
 	Text.Parent = ArrayFrame
 
 	local maxWidth = ArrayFrame.AbsoluteSize.X
@@ -144,13 +156,26 @@ local function AddArray(name)
     Text.Size = UDim2.new(0, 0, 0, 22)
 	local NewSize = UDim2.new(0, textSize.X, 0, 22)
 
-	table.insert(Array, Text)
+	table.insert(Array.Arrays, Text)
+
+    local Suffix = Instance.new('Frame')
+    Suffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
+    Suffix.Position = UDim2.new(2, -textSize.X + 1, 0, 0)
+    Suffix.Size = UDim2.new(0, 0, 0, 0)
+    Suffix.ZIndex = -1
+    Suffix.BorderSizePixel = 0
+    Suffix.Parent = Text
+    Suffix.Size = UDim2.new(0, 3, 0, 22)
+    Suffix.Visible = SuffixVal.Enabled and true or false
+
+    table.insert(Array.Suffix, Suffix)
 
 	if name == '' then
 		NewSize = UDim2.new(0, 0, 0, 0)
 	end
 
 	local ArrayIn = tweenService:Create(Text, TweenInfo.new(0.3), {Size = NewSize, Position = UDim2.new(1, -textSize.X, 0, 0)})
+
 	if ArrayIn then
 		ArrayIn:Play()
 
@@ -159,127 +184,50 @@ local function AddArray(name)
 		end))
 	end
 
-	table.sort(Array, function(a, b)
+	table.sort(Array.Arrays, function(a, b)
 		return textService:GetTextSize(a.Text, a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(b.Text, b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
 	end)
 
-	for i, v in Array do
+	for i, v in Array.Arrays do
 		v.LayoutOrder = i
 	end
 end
 
 local function RemoveArray(name)
 	local maxWidth = ArrayFrame.AbsoluteSize.X
-	table.sort(Array, function(a, b)
+	table.sort(Array.Arrays, function(a, b)
 		return textService:GetTextSize(a.Text, a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(b.Text, b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
 	end)
 
-	for i,v in Array do
+	for i,v in Array.Arrays do
 		if v.Text == name then
 			v.TextTransparency = 1
-			local textSize = textService:GetTextSize(' '..name..' ', v.TextSize, v.Font, Vector2.new(maxWidth, 1 / 0))
 			local ArrayOut = tweenService:Create(v, TweenInfo.new(0.2), {Size = UDim2.new(0, 0, 0, 20)})
+
 			if ArrayOut then
 				ArrayOut:Play()
 
 				table.insert(lib.connections, ArrayOut.Completed:Connect(function()
+                    for x,d in Array.Suffix do
+                        if d.Parent == v then
+                            table.remove(Array.Suffix, x)
+                        end
+                    end
+                    
 					v:Destroy()
-					table.remove(Array, i)
+					table.remove(Array.Arrays, i)
 				end))
 			end
 		end
 	end
 
-	for i, v in Array do
+	for i, v in Array.Arrays do
 		v.LayoutOrder = i
 	end
 end
 
-local TargetFrame = Instance.new("Frame")
-TargetFrame.Parent = ScreenGUI
-TargetFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-TargetFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TargetFrame.BackgroundTransparency = 0.15
-TargetFrame.BorderSizePixel = 0
-TargetFrame.Size = UDim2.new(0, 231, 0, 50)
-TargetFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-TargetFrame.Visible = false
-
-local TargetImage = Instance.new("ImageLabel")
-TargetImage.Parent = TargetFrame
-TargetImage.AnchorPoint = Vector2.new(0, 0.5)
-TargetImage.BackgroundTransparency = 1
-TargetImage.Position = UDim2.new(0, 5, 0.5, 0)
-TargetImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TargetImage.Size = UDim2.new(0, 40, 0, 40)
-
-local TargetName = Instance.new("TextLabel")
-TargetName.Parent = TargetFrame
-TargetName.BackgroundTransparency = 1
-TargetName.Font = Enum.Font.SourceSansBold
-TargetName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TargetName.TextColor3 = Color3.fromRGB(255, 255, 255)
-TargetName.TextSize = 18
-TargetName.TextWrapped = true
-TargetName.TextXAlignment = Enum.TextXAlignment.Left
-
-local HealthBack = Instance.new("Frame")
-HealthBack.Parent = TargetFrame
-HealthBack.AnchorPoint = Vector2.new(0, 0.5)
-HealthBack.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-HealthBack.BackgroundTransparency = 0.35
-HealthBack.Position = UDim2.new(0, 50, 0.75, 0)
-HealthBack.Size = UDim2.new(0, 100, 0, 8)
-HealthBack.BorderSizePixel = 0
-
-local HealthFront = Instance.new("Frame")
-HealthFront.Parent = HealthBack
-HealthFront.AnchorPoint = Vector2.new(0, 0.5)
-HealthFront.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
-HealthFront.Position = UDim2.new(0, 0, 0.5, 0)
-HealthFront.Size = UDim2.new(0, 50, 0, 8)
-HealthFront.BorderSizePixel = 0
-
-function lib.API:CreateTargetHUD(name, thumbnail, humanoid, ishere)
-	local TargetHUD = {}
-
-	if ishere then
-		TargetFrame.Visible = true
-		if name and humanoid then
-			TargetImage.Image = thumbnail
-			TargetName.Text = name
-
-			local Calculation = humanoid.Health / humanoid.MaxHealth
-			local NewTextSize = textService:GetTextSize(TargetName.Text, TargetName.TextSize, TargetName.Font, Vector2.new(9999, 50))
-			local Width = NewTextSize.X + TargetImage.Size.X.Offset + 20
-			local NewSize_2 = UDim2.new(0, Width, 0, 50)
-
-			TargetFrame.Size = NewSize_2
-			HealthBack.Size = UDim2.new(0, NewTextSize.X, 0, 8)
-			TargetName.Size = UDim2.new(0, NewTextSize.X, 0, NewTextSize.Y)
-			TargetName.Position = UDim2.new(0, HealthBack.Position.X.Offset, 0.12, 0)
-
-			if humanoid.Health > 0 then
-				tweenService:Create(HealthFront, TweenInfo.new(0.5), { Size = UDim2.new(Calculation, 0, 0, 8) }):Play()
-			elseif humanoid.Health < 0 then
-				tweenService:Create(HealthFront, TweenInfo.new(0.5), { Size = UDim2.new(-0, 0, 0, 8) }):Play()
-			else
-				tweenService:Create(HealthFront, TweenInfo.new(0.5), { Size = UDim2.new(-0, 0, 0, 8) }):Play()
-			end
-		end
-	else
-		TargetFrame.Visible = false
-	end
-
-	return TargetHUD
-end
-
 function lib.API.EnableArray(tog)
 	ArrayFrame.Visible = tog
-end
-
-if inputService.TouchEnabled then
-	--lplr:Kick('Not mobile supported for the time being :)')
 end
 
 configSys:Load()
@@ -301,8 +249,9 @@ lib.API.Watermark = function(bool, txt)
 		watermark.BackgroundTransparency = 1
 		watermark.BorderSizePixel = 0
 		watermark.Text = txt
-		watermark.TextSize = 24
+		watermark.TextSize = 40
 		watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
+        watermark.Font = Enum.Font.BuilderSansMedium
 		watermark.Parent = ScreenGUI
 
 		watermarkimage = Instance.new('ImageLabel')
@@ -365,8 +314,12 @@ lib.API.ChangeColor = function()
 		end
 	end
 
-	for i,v in Array do
+	for i,v in Array.Arrays do
 		v.TextColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
+	end
+
+    for i,v in Array.Suffix do
+		v.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
 	end
 end
 
@@ -392,9 +345,10 @@ lib.API.CreateWindow = function(txt)
 	WindowLabel.BorderSizePixel = 0
 	WindowLabel.TextXAlignment = Enum.TextXAlignment.Left
 	WindowLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	WindowLabel.TextSize = 12
+	WindowLabel.TextSize = 20
 	WindowLabel.AutomaticSize = Enum.AutomaticSize.X
 	WindowLabel.Text = txt
+    WindowLabel.Font = Enum.Font.BuilderSansMedium
 	WindowLabel.Parent = WindowFrame
 
 	local ModuleFrame = Instance.new('Frame')
@@ -418,6 +372,7 @@ lib.API.CreateWindow = function(txt)
 		if gpe then return end
 
 		if key.KeyCode == Enum.KeyCode.RightShift then
+            Blur.Enabled = not WindowFrame.Visible
 			WindowFrame.Visible = not WindowFrame.Visible
 		end
 	end))
@@ -454,9 +409,10 @@ lib.API.CreateWindow = function(txt)
 			ModuleText.BorderSizePixel = 0
 			ModuleText.TextXAlignment = Enum.TextXAlignment.Left
 			ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ModuleText.TextSize = 12
+			ModuleText.TextSize = 20
 			ModuleText.AutomaticSize = Enum.AutomaticSize.X
 			ModuleText.Text = Table.Name
+            ModuleText.Font = Enum.Font.BuilderSans
 			ModuleText.Parent = ModuleButton
 
 			local DropdownFrame = Instance.new('Frame')
@@ -510,8 +466,9 @@ lib.API.CreateWindow = function(txt)
 				ModuleText.BackgroundTransparency = 1
 				ModuleText.TextXAlignment = Enum.TextXAlignment.Left
 				ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-				ModuleText.TextSize = 10
+				ModuleText.TextSize = 18
 				ModuleText.Text = tab.Name
+                ModuleText.Font = Enum.Font.BuilderSans
 				ModuleText.Parent = ModuleFrame
 
 				local moduleHandler = {
@@ -563,8 +520,9 @@ lib.API.CreateWindow = function(txt)
 				PickerText.TextXAlignment = Enum.TextXAlignment.Left
 				PickerText.TextYAlignment = Enum.TextYAlignment.Center
 				PickerText.TextColor3 = Color3.fromRGB(255, 255, 255)
-				PickerText.TextSize = 10
+				PickerText.TextSize = 18
 				PickerText.Text = tab.Name
+                PickerText.Font = Enum.Font.BuilderSans
 				PickerText.Parent = PickerFrame
 
 				local OptionText = Instance.new('TextLabel')
@@ -574,8 +532,9 @@ lib.API.CreateWindow = function(txt)
 				OptionText.TextXAlignment = Enum.TextXAlignment.Right
 				OptionText.TextYAlignment = Enum.TextYAlignment.Center
 				OptionText.TextColor3 = Color3.fromRGB(255, 255, 255)
-				OptionText.TextSize = 10
+				OptionText.TextSize = 18
 				OptionText.Text = cfg[Table.Name].Dropdowns[tab.Name].Value
+                OptionText.Font = Enum.Font.BuilderSans
 				OptionText.Parent = PickerFrame
 
 				local pickerHandler = {
@@ -643,8 +602,9 @@ lib.API.CreateWindow = function(txt)
 				SliderText.BackgroundTransparency = 1
 				SliderText.TextXAlignment = Enum.TextXAlignment.Left
 				SliderText.TextColor3 = Color3.fromRGB(255, 255, 255)
-				SliderText.TextSize = 10
+				SliderText.TextSize = 18
 				SliderText.Text = tab.Name
+                SliderText.Font = Enum.Font.BuilderSans
 				SliderText.Parent = SliderFrame
 
 				local ValueText = Instance.new('TextBox')
@@ -653,8 +613,9 @@ lib.API.CreateWindow = function(txt)
 				ValueText.BackgroundTransparency = 1
 				ValueText.TextXAlignment = Enum.TextXAlignment.Right
 				ValueText.TextColor3 = Color3.fromRGB(255, 255, 255)
-				ValueText.TextSize = 10
+				ValueText.TextSize = 18
 				ValueText.Text = string.format('%.2f', cfg[Table.Name].Sliders[tab.Name].Value)
+                ValueText.Font = Enum.Font.BuilderSans
 				ValueText.Parent = SliderFrame
 
 				local textSize = textService:GetTextSize(string.format('%.2f', cfg[Table.Name].Sliders[tab.Name].Value), ValueText.TextSize, ValueText.Font, Vector2.new(SliderFrame.AbsoluteSize.X, 1 / 0))
@@ -788,8 +749,9 @@ lib.API.CreateWindow = function(txt)
 			KeybindText.BackgroundTransparency = 1
 			KeybindText.TextXAlignment = Enum.TextXAlignment.Left
 			KeybindText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			KeybindText.TextSize = 10.5
+			KeybindText.TextSize = 18.5
 			KeybindText.Text = 'Keybind: '..cfg[Table.Name].Keybind
+            KeybindText.Font = Enum.Font.BuilderSans
 			KeybindText.Parent = KeybindButton
 
 			table.insert(lib.connections, KeybindText.MouseButton1Click:Connect(function()
@@ -844,7 +806,93 @@ lib.API.Uninject = function()
 
 	ScreenGUI:Destroy()
 	ArrayGUI:Destroy()
+    Blur:Destroy()
 	lib = nil
 end
+
+lib.API.Tabs = {
+    Combat = lib.API.CreateWindow('Combat'),
+    Move = lib.API.CreateWindow('Movement'),
+    Player = lib.API.CreateWindow('Player'),
+    Visual = lib.API.CreateWindow('Visual'),
+    Exploit = lib.API.CreateWindow('Exploit'),
+    Misc = lib.API.CreateWindow('Miscellaneous')
+}
+
+local HUD
+local Watermark
+local Arraylist
+local ThemePicker
+task.defer(function()
+    HUD = lib.API.Tabs.Visual:CreateModule({
+        Name = 'HUD',
+        Function = function(callback)
+            if callback then
+                repeat task.wait() until (Watermark and Arraylist) ~= nil
+
+                lib.API.Watermark(Watermark.Enabled, 'Monsoon')
+                lib.API.EnableArray(Arraylist.Enabled)
+
+                if Arraylist.Enabled then
+                    for i,v in Array.Suffix do
+                        v.Visible = SuffixVal.Enabled
+                    end
+                end
+            else
+                lib.API.Watermark(callback, 'Monsoon')
+                lib.API.EnableArray(callback)
+            end
+        end
+    })
+    ThemePicker = HUD:CreatePicker({
+        Name = 'Theme',
+        Default = 'Monsoon',
+        Options = {'Monsoon', 'Astolfo'},
+        Function = function(val)
+            if HUD.Enabled then
+                lib.API.themes.theme = val
+                lib.API.ChangeColor()
+            end
+        end
+    })
+    Arraylist = HUD:CreateToggle({
+        Name = 'Arraylist',
+        Function = function(val)
+            if HUD.Enabled then
+                lib.API.EnableArray(val)
+            end
+        end
+    })
+    SuffixVal = HUD:CreateToggle({
+        Name = 'Suffix',
+        Function = function(val)
+            if HUD.Enabled and Arraylist.Enabled then
+                for i,v in Array.Suffix do
+                    v.Visible = val
+                end
+            end
+        end
+    })
+    Watermark = HUD:CreateToggle({
+        Name = 'Watermark',
+        Function = function(val)
+            if HUD.Enabled then
+                lib.API.Watermark(val, 'Monsoon')
+            end
+        end
+    })
+end)
+
+local Uninject
+task.defer(function()
+    Uninject = lib.API.Tabs.Visual:CreateModule({
+        Name = 'Uninject',
+        Function = function(callback)
+            if callback then
+                lib.API.Uninject()
+            end
+        end
+    })
+end)
 
 return lib
