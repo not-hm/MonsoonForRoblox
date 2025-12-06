@@ -118,8 +118,8 @@ local SuffixVal = {Enabled = true}
 local index = 0
 local Windows = {}
 local Array = {
-    Suffix = {},
-    Arrays = {}
+	Suffix = {},
+	Arrays = {}
 }
 
 local ArrayFrame = Instance.new('Frame')
@@ -135,40 +135,43 @@ ArrayLayout.Parent = ArrayFrame
 ArrayLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ArrayLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local function AddArray(name)
+local function AddArray(name, Suffix)
+	local textSuffix = Suffix..' ' or ''
+	
 	local Text = Instance.new('TextLabel')
 	Text.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	Text.BackgroundTransparency = 0.75
 	Text.TextTransparency = 1
 	Text.BorderSizePixel = 0
-	Text.Text = name
+	Text.RichText = true
+	Text.Text = name..(Suffix and ' <font color=\'#A8A8A8\'>'..Suffix..'</font>' or '')
 	Text.TextColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
 	Text.TextSize = 20
 	Text.ZIndex = -1
 	Text.Name = name
 	Text.TextYAlignment = Enum.TextYAlignment.Center
 	Text.TextXAlignment = Enum.TextXAlignment.Center
-    Text.Font = Enum.Font.BuilderSansMedium
+	Text.Font = Enum.Font.BuilderSansMedium
 	Text.Parent = ArrayFrame
 
 	local maxWidth = ArrayFrame.AbsoluteSize.X
-	local textSize = textService:GetTextSize(' '..name..' ', Text.TextSize, Text.Font, Vector2.new(maxWidth, 1 / 0))
-    Text.Size = UDim2.new(0, 0, 0, 22)
+	local textSize = textService:GetTextSize(' '..name..' '..textSuffix, Text.TextSize, Text.Font, Vector2.new(maxWidth, 1 / 0))
+	Text.Size = UDim2.new(0, 0, 0, 22)
 	local NewSize = UDim2.new(0, textSize.X, 0, 22)
 
 	table.insert(Array.Arrays, Text)
 
-    local Suffix = Instance.new('Frame')
-    Suffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
-    Suffix.Position = UDim2.new(2, -textSize.X + 1, 0, 0)
-    Suffix.Size = UDim2.new(0, 0, 0, 0)
-    Suffix.ZIndex = -1
-    Suffix.BorderSizePixel = 0
-    Suffix.Parent = Text
-    Suffix.Size = UDim2.new(0, 3, 0, 22)
-    Suffix.Visible = SuffixVal.Enabled and true or false
+	local Suffix = Instance.new('Frame')
+	Suffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
+	Suffix.Position = UDim2.new(2, -textSize.X + 0.0001, 0, 0)
+	Suffix.Size = UDim2.new(0, 0, 0, 0)
+	Suffix.ZIndex = -1
+	Suffix.BorderSizePixel = 0
+	Suffix.Parent = Text
+	Suffix.Size = UDim2.new(0, 3, 0, 22)
+	Suffix.Visible = SuffixVal.Enabled and true or false
 
-    table.insert(Array.Suffix, Suffix)
+	table.insert(Array.Suffix, Suffix)
 
 	if name == '' then
 		NewSize = UDim2.new(0, 0, 0, 0)
@@ -208,12 +211,12 @@ local function RemoveArray(name)
 				ArrayOut:Play()
 
 				table.insert(lib.connections, ArrayOut.Completed:Connect(function()
-                    for x,d in Array.Suffix do
-                        if d.Parent == v then
-                            table.remove(Array.Suffix, x)
-                        end
-                    end
-                    
+					for x,d in Array.Suffix do
+						if d.Parent == v then
+							table.remove(Array.Suffix, x)
+						end
+					end
+
 					v:Destroy()
 					table.remove(Array.Arrays, i)
 				end))
@@ -251,7 +254,7 @@ lib.API.Watermark = function(bool, txt)
 		watermark.Text = txt
 		watermark.TextSize = 40
 		watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
-        watermark.Font = Enum.Font.BuilderSansMedium
+		watermark.Font = Enum.Font.BuilderSansMedium
 		watermark.Parent = ScreenGUI
 
 		watermarkimage = Instance.new('ImageLabel')
@@ -318,7 +321,7 @@ lib.API.ChangeColor = function()
 		v.TextColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
 	end
 
-    for i,v in Array.Suffix do
+	for i,v in Array.Suffix do
 		v.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
 	end
 end
@@ -348,7 +351,7 @@ lib.API.CreateWindow = function(txt)
 	WindowLabel.TextSize = 20
 	WindowLabel.AutomaticSize = Enum.AutomaticSize.X
 	WindowLabel.Text = txt
-    WindowLabel.Font = Enum.Font.BuilderSansMedium
+	WindowLabel.Font = Enum.Font.BuilderSansMedium
 	WindowLabel.Parent = WindowFrame
 
 	local ModuleFrame = Instance.new('Frame')
@@ -372,7 +375,7 @@ lib.API.CreateWindow = function(txt)
 		if gpe then return end
 
 		if key.KeyCode == Enum.KeyCode.RightShift then
-            Blur.Enabled = not WindowFrame.Visible
+			Blur.Enabled = not WindowFrame.Visible
 			WindowFrame.Visible = not WindowFrame.Visible
 		end
 	end))
@@ -412,7 +415,7 @@ lib.API.CreateWindow = function(txt)
 			ModuleText.TextSize = 20
 			ModuleText.AutomaticSize = Enum.AutomaticSize.X
 			ModuleText.Text = Table.Name
-            ModuleText.Font = Enum.Font.BuilderSans
+			ModuleText.Font = Enum.Font.BuilderSans
 			ModuleText.Parent = ModuleButton
 
 			local DropdownFrame = Instance.new('Frame')
@@ -425,6 +428,8 @@ lib.API.CreateWindow = function(txt)
 			local DropdownSort = Instance.new('UIListLayout')
 			DropdownSort.SortOrder = Enum.SortOrder.LayoutOrder
 			DropdownSort.Parent = DropdownFrame
+			
+			local Suffix = Table.ExtraText and Table.ExtraText() or ''
 
 			local moduleHandler = {
 				Enabled = cfg[Table.Name].Enabled,
@@ -438,7 +443,7 @@ lib.API.CreateWindow = function(txt)
 					end
 
 					if self.Enabled then
-						task.spawn(AddArray, Table.Name)
+						task.spawn(AddArray, Table.Name, Suffix)
 					else
 						task.spawn(RemoveArray, Table.Name)
 					end
@@ -468,7 +473,7 @@ lib.API.CreateWindow = function(txt)
 				ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				ModuleText.TextSize = 18
 				ModuleText.Text = tab.Name
-                ModuleText.Font = Enum.Font.BuilderSans
+				ModuleText.Font = Enum.Font.BuilderSans
 				ModuleText.Parent = ModuleFrame
 
 				local moduleHandler = {
@@ -522,7 +527,7 @@ lib.API.CreateWindow = function(txt)
 				PickerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				PickerText.TextSize = 18
 				PickerText.Text = tab.Name
-                PickerText.Font = Enum.Font.BuilderSans
+				PickerText.Font = Enum.Font.BuilderSans
 				PickerText.Parent = PickerFrame
 
 				local OptionText = Instance.new('TextLabel')
@@ -534,7 +539,7 @@ lib.API.CreateWindow = function(txt)
 				OptionText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				OptionText.TextSize = 18
 				OptionText.Text = cfg[Table.Name].Dropdowns[tab.Name].Value
-                OptionText.Font = Enum.Font.BuilderSans
+				OptionText.Font = Enum.Font.BuilderSans
 				OptionText.Parent = PickerFrame
 
 				local pickerHandler = {
@@ -604,7 +609,7 @@ lib.API.CreateWindow = function(txt)
 				SliderText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				SliderText.TextSize = 18
 				SliderText.Text = tab.Name
-                SliderText.Font = Enum.Font.BuilderSans
+				SliderText.Font = Enum.Font.BuilderSans
 				SliderText.Parent = SliderFrame
 
 				local ValueText = Instance.new('TextBox')
@@ -615,7 +620,7 @@ lib.API.CreateWindow = function(txt)
 				ValueText.TextColor3 = Color3.fromRGB(255, 255, 255)
 				ValueText.TextSize = 18
 				ValueText.Text = string.format('%.2f', cfg[Table.Name].Sliders[tab.Name].Value)
-                ValueText.Font = Enum.Font.BuilderSans
+				ValueText.Font = Enum.Font.BuilderSans
 				ValueText.Parent = SliderFrame
 
 				local textSize = textService:GetTextSize(string.format('%.2f', cfg[Table.Name].Sliders[tab.Name].Value), ValueText.TextSize, ValueText.Font, Vector2.new(SliderFrame.AbsoluteSize.X, 1 / 0))
@@ -751,7 +756,7 @@ lib.API.CreateWindow = function(txt)
 			KeybindText.TextColor3 = Color3.fromRGB(255, 255, 255)
 			KeybindText.TextSize = 18.5
 			KeybindText.Text = 'Keybind: '..cfg[Table.Name].Keybind
-            KeybindText.Font = Enum.Font.BuilderSans
+			KeybindText.Font = Enum.Font.BuilderSans
 			KeybindText.Parent = KeybindButton
 
 			table.insert(lib.connections, KeybindText.MouseButton1Click:Connect(function()
@@ -806,17 +811,17 @@ lib.API.Uninject = function()
 
 	ScreenGUI:Destroy()
 	ArrayGUI:Destroy()
-    Blur:Destroy()
+	Blur:Destroy()
 	lib = nil
 end
 
 lib.API.Tabs = {
-    Combat = lib.API.CreateWindow('Combat'),
-    Move = lib.API.CreateWindow('Movement'),
-    Player = lib.API.CreateWindow('Player'),
-    Visual = lib.API.CreateWindow('Visual'),
-    Exploit = lib.API.CreateWindow('Exploit'),
-    Misc = lib.API.CreateWindow('Miscellaneous')
+	Combat = lib.API.CreateWindow('Combat'),
+	Move = lib.API.CreateWindow('Movement'),
+	Player = lib.API.CreateWindow('Player'),
+	Visual = lib.API.CreateWindow('Visual'),
+	Exploit = lib.API.CreateWindow('Exploit'),
+	Misc = lib.API.CreateWindow('Miscellaneous')
 }
 
 local HUD
@@ -824,75 +829,78 @@ local Watermark
 local Arraylist
 local ThemePicker
 task.defer(function()
-    HUD = lib.API.Tabs.Visual:CreateModule({
-        Name = 'HUD',
-        Function = function(callback)
-            if callback then
-                repeat task.wait() until (Watermark and Arraylist) ~= nil
+	HUD = lib.API.Tabs.Visual:CreateModule({
+		Name = 'HUD',
+		Function = function(callback)
+			if callback then
+				repeat task.wait() until (Watermark and Arraylist) ~= nil
 
-                lib.API.Watermark(Watermark.Enabled, 'Monsoon')
-                lib.API.EnableArray(Arraylist.Enabled)
+				lib.API.Watermark(Watermark.Enabled, 'Monsoon')
+				lib.API.EnableArray(Arraylist.Enabled)
 
-                if Arraylist.Enabled then
-                    for i,v in Array.Suffix do
-                        v.Visible = SuffixVal.Enabled
-                    end
-                end
-            else
-                lib.API.Watermark(callback, 'Monsoon')
-                lib.API.EnableArray(callback)
-            end
-        end
-    })
-    ThemePicker = HUD:CreatePicker({
-        Name = 'Theme',
-        Default = 'Monsoon',
-        Options = {'Monsoon', 'Astolfo'},
-        Function = function(val)
-            if HUD.Enabled then
-                lib.API.themes.theme = val
-                lib.API.ChangeColor()
-            end
-        end
-    })
-    Arraylist = HUD:CreateToggle({
-        Name = 'Arraylist',
-        Function = function(val)
-            if HUD.Enabled then
-                lib.API.EnableArray(val)
-            end
-        end
-    })
-    SuffixVal = HUD:CreateToggle({
-        Name = 'Suffix',
-        Function = function(val)
-            if HUD.Enabled and Arraylist.Enabled then
-                for i,v in Array.Suffix do
-                    v.Visible = val
-                end
-            end
-        end
-    })
-    Watermark = HUD:CreateToggle({
-        Name = 'Watermark',
-        Function = function(val)
-            if HUD.Enabled then
-                lib.API.Watermark(val, 'Monsoon')
-            end
-        end
-    })
+				if Arraylist.Enabled then
+					for i,v in Array.Suffix do
+						v.Visible = SuffixVal.Enabled
+					end
+				end
+			else
+				lib.API.Watermark(callback, 'Monsoon')
+				lib.API.EnableArray(callback)
+			end
+		end,
+		ExtraText = function()
+			return 'balls'
+		end,
+	})
+	ThemePicker = HUD:CreatePicker({
+		Name = 'Theme',
+		Default = 'Monsoon',
+		Options = {'Monsoon', 'Astolfo'},
+		Function = function(val)
+			if HUD.Enabled then
+				lib.API.themes.theme = val
+				lib.API.ChangeColor()
+			end
+		end
+	})
+	Arraylist = HUD:CreateToggle({
+		Name = 'Arraylist',
+		Function = function(val)
+			if HUD.Enabled then
+				lib.API.EnableArray(val)
+			end
+		end
+	})
+	SuffixVal = HUD:CreateToggle({
+		Name = 'Suffix',
+		Function = function(val)
+			if HUD.Enabled and Arraylist.Enabled then
+				for i,v in Array.Suffix do
+					v.Visible = val
+				end
+			end
+		end
+	})
+	Watermark = HUD:CreateToggle({
+		Name = 'Watermark',
+		Function = function(val)
+			if HUD.Enabled then
+				lib.API.Watermark(val, 'Monsoon')
+			end
+		end
+	})
 end)
 
 local Uninject
 task.defer(function()
-    Uninject = lib.API.Tabs.Visual:CreateModule({
-        Name = 'Uninject',
-        Function = function(callback)
-            if callback then
-                lib.API.Uninject()
-            end
-        end
-    })
+	Uninject = lib.API.Tabs.Visual:CreateModule({
+		Name = 'Uninject',
+		Function = function(callback)
+			if callback then
+				lib.API.Uninject()
+			end
+		end
+	})
 end)
 
 return lib
