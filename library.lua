@@ -135,6 +135,7 @@ ArrayLayout.Parent = ArrayFrame
 ArrayLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ArrayLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+--// Array supports RichText
 local function AddArray(name, Suffix)
 	local textSuffix = Suffix..' ' or ''
 	
@@ -144,7 +145,7 @@ local function AddArray(name, Suffix)
 	Text.TextTransparency = 1
 	Text.BorderSizePixel = 0
 	Text.RichText = true
-	Text.Text = name..(Suffix and ' <font color=\'#A8A8A8\'>'..Suffix..'</font>' or '')
+	Text.Text = name..(Suffix and ' <font color=\'#d1d1d1\'>'..Suffix..'</font>' or '')
 	Text.TextColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
 	Text.TextSize = 20
 	Text.ZIndex = -1
@@ -163,7 +164,8 @@ local function AddArray(name, Suffix)
 
 	local Suffix = Instance.new('Frame')
 	Suffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
-	Suffix.Position = UDim2.new(2, -textSize.X + 0.0001, 0, 0)
+	Suffix.AnchorPoint = Vector2.new(0, 0.5)
+	Suffix.Position = UDim2.new(2, -textSize.X, 0.5, 0)
 	Suffix.Size = UDim2.new(0, 0, 0, 0)
 	Suffix.ZIndex = -1
 	Suffix.BorderSizePixel = 0
