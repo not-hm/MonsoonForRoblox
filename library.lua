@@ -135,10 +135,12 @@ ArrayLayout.Parent = ArrayFrame
 ArrayLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 ArrayLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+local function removeTags(text)
+	return string.gsub(text, '<[^>]*>', '')
+end
+
 --// Array supports RichText
 local function AddArray(name, Suffix)
-	local textSuffix = Suffix..' ' or ''
-	
 	local Text = Instance.new('TextLabel')
 	Text.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	Text.BackgroundTransparency = 0.75
@@ -156,28 +158,24 @@ local function AddArray(name, Suffix)
 	Text.Parent = ArrayFrame
 
 	local maxWidth = ArrayFrame.AbsoluteSize.X
-	local textSize = textService:GetTextSize(' '..name..' '..textSuffix, Text.TextSize, Text.Font, Vector2.new(maxWidth, 1 / 0))
+	local textSize = textService:GetTextSize(' '..removeTags(Text.Text)..' ', Text.TextSize, Text.Font, Vector2.new(maxWidth, 1 / 0))
 	Text.Size = UDim2.new(0, 0, 0, 22)
 	local NewSize = UDim2.new(0, textSize.X, 0, 22)
 
 	table.insert(Array.Arrays, Text)
 
-	local Suffix = Instance.new('Frame')
-	Suffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
-	Suffix.AnchorPoint = Vector2.new(0, 0.5)
-	Suffix.Position = UDim2.new(2, -textSize.X, 0.5, 0)
-	Suffix.Size = UDim2.new(0, 0, 0, 0)
-	Suffix.ZIndex = -1
-	Suffix.BorderSizePixel = 0
-	Suffix.Parent = Text
-	Suffix.Size = UDim2.new(0, 3, 0, 22)
-	Suffix.Visible = SuffixVal.Enabled and true or false
+	local RelSuffix = Instance.new('Frame')
+	RelSuffix.BackgroundColor3 = lib.API.themes.Secondary[lib.API.themes.theme]
+	RelSuffix.AnchorPoint = Vector2.new(0, 0.5)
+	RelSuffix.Position = UDim2.new(2, -textSize.X, 0.5, 0)
+	RelSuffix.Size = UDim2.new(0, 0, 0, 0)
+	RelSuffix.ZIndex = -1
+	RelSuffix.BorderSizePixel = 0
+	RelSuffix.Parent = Text
+	RelSuffix.Size = UDim2.new(0, 3, 0, 22)
+	RelSuffix.Visible = SuffixVal.Enabled and true or false
 
-	table.insert(Array.Suffix, Suffix)
-
-	if name == '' then
-		NewSize = UDim2.new(0, 0, 0, 0)
-	end
+	table.insert(Array.Suffix, RelSuffix)
 
 	local ArrayIn = tweenService:Create(Text, TweenInfo.new(0.3), {Size = NewSize, Position = UDim2.new(1, -textSize.X, 0, 0)})
 
@@ -190,7 +188,7 @@ local function AddArray(name, Suffix)
 	end
 
 	table.sort(Array.Arrays, function(a, b)
-		return textService:GetTextSize(a.Text, a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(b.Text, b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
+		return textService:GetTextSize(removeTags(a.Text), a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(removeTags(b.Text), b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
 	end)
 
 	for i, v in Array.Arrays do
@@ -201,11 +199,11 @@ end
 local function RemoveArray(name)
 	local maxWidth = ArrayFrame.AbsoluteSize.X
 	table.sort(Array.Arrays, function(a, b)
-		return textService:GetTextSize(a.Text, a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(b.Text, b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
+		return textService:GetTextSize(removeTags(a.Text), a.TextSize, a.Font, Vector2.new(maxWidth, 1 / 0)).X > textService:GetTextSize(removeTags(b.Text), b.TextSize, b.Font, Vector2.new(maxWidth, 1 / 0)).X
 	end)
 
 	for i,v in Array.Arrays do
-		if v.Text == name then
+		if v.Name == name then
 			v.TextTransparency = 1
 			local ArrayOut = tweenService:Create(v, TweenInfo.new(0.2), {Size = UDim2.new(0, 0, 0, 20)})
 
@@ -240,7 +238,7 @@ task.wait(0.1)
 
 for i,v in cfg do
 	if type(v) == 'table' and v.Enabled then
-		AddArray(i)
+		AddArray(i, i.ExtraText and i.ExtraText() or nil)
 	end
 end
 
@@ -430,8 +428,6 @@ lib.API.CreateWindow = function(txt)
 			local DropdownSort = Instance.new('UIListLayout')
 			DropdownSort.SortOrder = Enum.SortOrder.LayoutOrder
 			DropdownSort.Parent = DropdownFrame
-			
-			local Suffix = Table.ExtraText and Table.ExtraText() or ''
 
 			local moduleHandler = {
 				Enabled = cfg[Table.Name].Enabled,
@@ -445,7 +441,7 @@ lib.API.CreateWindow = function(txt)
 					end
 
 					if self.Enabled then
-						task.spawn(AddArray, Table.Name, Suffix)
+						task.spawn(AddArray, Table.Name, Table.ExtraText and Table.ExtraText() or nil)
 					else
 						task.spawn(RemoveArray, Table.Name)
 					end
@@ -732,10 +728,12 @@ lib.API.CreateWindow = function(txt)
 				moduleHandler:Toggle()
 			end))
 
-			if cfg[Table.Name].Enabled and Table.Function then
-				task.delay(0.1, function()
-					task.spawn(Table.Function, cfg[Table.Name].Enabled)
-				end)
+			if cfg[Table.Name].Enabled then
+				if Table.Function then
+					task.delay(0.1, function()
+						task.spawn(Table.Function, cfg[Table.Name].Enabled)
+					end)
+				end
 			end
 
 			table.insert(lib.connections, ModuleText.MouseButton2Down:Connect(function()
@@ -849,10 +847,7 @@ task.defer(function()
 				lib.API.Watermark(callback, 'Monsoon')
 				lib.API.EnableArray(callback)
 			end
-		end,
-		ExtraText = function()
-			return 'balls'
-		end,
+		end
 	})
 	ThemePicker = HUD:CreatePicker({
 		Name = 'Theme',
