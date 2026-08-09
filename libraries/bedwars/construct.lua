@@ -1,4 +1,8 @@
-repeat task.wait() until shared.Monsoon.Game ~= nil
+--[[
+    Gay bedwars cum dumper
+    Reports says ultra-detected
+    by @nothm_ // nothm
+]]
 local cloneref = cloneref or function(obj) return obj end
 local ReplicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local TweenService = cloneref(game:GetService('TweenService'))
