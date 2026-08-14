@@ -3,8 +3,8 @@
 	- [ stav.lua ] -
 	Monsoon :3
 	
-	CREATED: [ 18/11 ]
-	
+	CREATED: [ 18/11/25 ]
+	stav i love you (no sexual intent yet)
 ]]
 
 local lib = {
